@@ -1,0 +1,21 @@
+{
+  "name": "blob-docs-indexer",
+  "dataSourceName": "blob-docs",
+  "targetIndexName": "docs",
+  "skillsetName": "embed-skillset",
+  "schedule": { "interval": "PT1H" },
+  "fieldMappings": [
+    { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "base64Encode" } },
+    { "sourceFieldName": "metadata_storage_name", "targetFieldName": "title" },
+    { "sourceFieldName": "content", "targetFieldName": "body" }
+  ],
+  "outputFieldMappings": [
+    { "sourceFieldName": "/document/embedding", "targetFieldName": "embedding" }
+  ],
+  "parameters": {
+    "configuration": {
+      "dataToExtract": "contentAndMetadata",
+      "parsingMode": "default"
+    }
+  }
+}

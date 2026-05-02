@@ -1,0 +1,21 @@
+@inject IGeolocation Geo
+
+<h1>Hybrid sample</h1>
+
+<button class="btn btn-primary" @onclick="GetLocationAsync">Where am I?</button>
+
+@if (location is not null)
+{
+    <p>Lat: @location.Latitude, Lon: @location.Longitude</p>
+}
+
+@code {
+    Location? location;
+
+    async Task GetLocationAsync()
+    {
+        // Native MAUI service called directly from a Razor component
+        location = await Geo.GetLastKnownLocationAsync()
+                  ?? await Geo.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Medium));
+    }
+}

@@ -1,0 +1,43 @@
+parameters:
+  - name: version
+    type: string
+    default: '10.0.x'
+  - name: configuration
+    type: string
+    default: Release
+
+jobs:
+  - job: Build
+    pool: { vmImage: ubuntu-latest }
+    steps:
+      - checkout: self
+        fetchDepth: 0
+
+      - task: UseDotNet@2
+        inputs: { version: ${{ parameters.version }} }
+
+      - script: dotnet restore --locked-mode
+        displayName: Restore
+
+      - script: dotnet build --no-restore -c ${{ parameters.configuration }}
+        displayName: Build
+
+      - script: |
+          dotnet test --no-build -c ${{ parameters.configuration }} \
+            --logger trx --collect:"XPlat Code Coverage"
+        displayName: Test
+
+      - task: PublishTestResults@2
+        condition: always()
+        inputs:
+          testResultsFormat: VSTest
+          testResultsFiles: '**/*.trx'
+
+      - task: Docker@2
+        inputs:
+          command: buildAndPush
+          containerRegistry: orders-registry
+          repository: orders-api
+          tags: |
+            $(Build.SourceVersion)
+            latest

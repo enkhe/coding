@@ -1,0 +1,6 @@
+config:
+  orders-infra:env: dev
+  orders-infra:tags:
+    app: orders
+    env: dev
+    cost-center: platform

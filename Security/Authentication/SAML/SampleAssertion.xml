@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Canonical SAML 2.0 assertion for reference. The <ds:Signature> element MUST
+  be verified before any other element is trusted. Real assertions include the
+  full XMLDSig structure with KeyInfo / X509Certificate.
+-->
+<samlp:Response
+    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+    ID="_response-1234"
+    Version="2.0"
+    IssueInstant="2026-05-02T10:00:00Z"
+    Destination="https://app.example.com/saml2/acs"
+    InResponseTo="_request-abcd">
+  <saml:Issuer>https://idp.example.com</saml:Issuer>
+  <samlp:Status>
+    <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success" />
+  </samlp:Status>
+  <saml:Assertion
+      ID="_assertion-5678"
+      Version="2.0"
+      IssueInstant="2026-05-02T10:00:00Z">
+    <saml:Issuer>https://idp.example.com</saml:Issuer>
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+      <!-- canonicalization, signature method, references, signature value, KeyInfo -->
+    </ds:Signature>
+    <saml:Subject>
+      <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">
+        alice@example.com
+      </saml:NameID>
+      <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+        <saml:SubjectConfirmationData
+            NotOnOrAfter="2026-05-02T10:05:00Z"
+            Recipient="https://app.example.com/saml2/acs"
+            InResponseTo="_request-abcd" />
+      </saml:SubjectConfirmation>
+    </saml:Subject>
+    <saml:Conditions
+        NotBefore="2026-05-02T09:59:30Z"
+        NotOnOrAfter="2026-05-02T10:05:00Z">
+      <saml:AudienceRestriction>
+        <saml:Audience>https://app.example.com/saml2</saml:Audience>
+      </saml:AudienceRestriction>
+    </saml:Conditions>
+    <saml:AuthnStatement
+        AuthnInstant="2026-05-02T10:00:00Z"
+        SessionIndex="_session-9012">
+      <saml:AuthnContext>
+        <saml:AuthnContextClassRef>
+          urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
+        </saml:AuthnContextClassRef>
+      </saml:AuthnContext>
+    </saml:AuthnStatement>
+    <saml:AttributeStatement>
+      <saml:Attribute Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress">
+        <saml:AttributeValue>alice@example.com</saml:AttributeValue>
+      </saml:Attribute>
+      <saml:Attribute Name="http://schemas.microsoft.com/ws/2008/06/identity/claims/role">
+        <saml:AttributeValue>admin</saml:AttributeValue>
+      </saml:Attribute>
+    </saml:AttributeStatement>
+  </saml:Assertion>
+</samlp:Response>

@@ -1,0 +1,55 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: 'Image tag (commit SHA) to deploy'
+        required: true
+      env:
+        description: 'Target environment'
+        type: choice
+        options: [staging, prod]
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.env }}
+      url: ${{ steps.deploy.outputs.app-url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify image signature (cosign)
+        uses: sigstore/cosign-installer@v3
+      - run: |
+          cosign verify ghcr.io/${{ github.repository }}:${{ inputs.target_sha }} \
+            --certificate-identity-regexp 'https://github\.com/${{ github.repository }}/.*' \
+            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
+
+      - name: Deploy to Container Apps
+        id: deploy
+        run: |
+          az containerapp update \
+            -n orders-api -g rg-orders-${{ inputs.env }} \
+            --image ghcr.io/${{ github.repository }}:${{ inputs.target_sha }}
+          url=$(az containerapp show -n orders-api -g rg-orders-${{ inputs.env }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          echo "app-url=https://$url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test
+        run: |
+          for i in {1..30}; do
+            curl -fsS "${{ steps.deploy.outputs.app-url }}/health/ready" && exit 0 || sleep 5
+          done; exit 1

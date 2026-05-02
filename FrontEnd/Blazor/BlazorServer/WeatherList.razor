@@ -1,0 +1,56 @@
+@page "/weather"
+@rendermode InteractiveServer
+@inherits OwningComponentBase<WeatherDbContext>
+@implements IAsyncDisposable
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+@if (forecasts is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <QuickGrid Items="forecasts.AsQueryable()" Pagination="pagination">
+        <PropertyColumn Property="@(f => f.Date)" Sortable="true" />
+        <PropertyColumn Property="@(f => f.TemperatureC)" Title="Temp (C)" Sortable="true" />
+        <PropertyColumn Property="@(f => f.Summary)" />
+    </QuickGrid>
+    <Paginator State="pagination" />
+}
+
+@code {
+    private List<WeatherForecast>? forecasts;
+    private readonly PaginationState pagination = new() { ItemsPerPage = 10 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Service is the scoped DbContext owned by this component (OwningComponentBase<T>)
+        forecasts = await Service.Forecasts
+            .OrderByDescending(f => f.Date)
+            .Take(100)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Owning scope auto-disposes; only override if you allocated extra resources
+        await Task.CompletedTask;
+    }
+
+    public class WeatherForecast
+    {
+        public int Id { get; set; }
+        public DateOnly Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string? Summary { get; set; }
+    }
+
+    public class WeatherDbContext : DbContext
+    {
+        public WeatherDbContext(DbContextOptions<WeatherDbContext> opts) : base(opts) { }
+        public DbSet<WeatherForecast> Forecasts => Set<WeatherForecast>();
+    }
+}

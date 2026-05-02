@@ -1,0 +1,83 @@
+# Build, push to ACR, deploy to App Service slot, swap to production.
+trigger:
+  branches:
+    include: [ main ]
+
+variables:
+  buildConfiguration: 'Release'
+  dotnetVersion: '10.0.x'
+  acrName: 'myacr'
+  imageRepo: 'web/api'
+  appServiceName: 'app-myapi-prod'
+  resourceGroup: 'rg-myapi-prod'
+  azureServiceConnection: 'sc-azure-prod-oidc'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: build
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: $(dotnetVersion)
+          - script: dotnet test --configuration $(buildConfiguration) --logger trx
+            displayName: 'Test'
+          - task: AzureCLI@2
+            displayName: 'Build & push container'
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az acr login -n $(acrName)
+                IMAGE=$(acrName).azurecr.io/$(imageRepo):$(Build.BuildId)
+                dotnet publish src/Api/Api.csproj \
+                  -c $(buildConfiguration) \
+                  /t:PublishContainer \
+                  /p:ContainerRepository=$(imageRepo) \
+                  /p:ContainerImageTag=$(Build.BuildId) \
+                  /p:ContainerRegistry=$(acrName).azurecr.io
+                echo "##vso[task.setvariable variable=imageTag;isOutput=true]$(Build.BuildId)"
+            name: buildStep
+
+  - stage: DeployStaging
+    dependsOn: Build
+    jobs:
+      - deployment: deployStaging
+        environment: 'app-myapi-staging'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebAppContainer@1
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    appName: $(appServiceName)
+                    deployToSlotOrASE: true
+                    resourceGroupName: $(resourceGroup)
+                    slotName: 'staging'
+                    imageName: '$(acrName).azurecr.io/$(imageRepo):$(Build.BuildId)'
+
+  - stage: SwapToProd
+    dependsOn: DeployStaging
+    jobs:
+      - deployment: swap
+        environment: 'app-myapi-prod'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureAppServiceManage@0
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    Action: 'Swap Slots'
+                    WebAppName: $(appServiceName)
+                    ResourceGroupName: $(resourceGroup)
+                    SourceSlot: 'staging'
+                    SwapWithProduction: true

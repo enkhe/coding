@@ -1,0 +1,32 @@
+name: reusable-build
+on:
+  workflow_call:
+    inputs:
+      project:
+        type: string
+        required: true
+      configuration:
+        type: string
+        default: Release
+    outputs:
+      image-digest:
+        description: Pushed image digest
+        value: ${{ jobs.build.outputs.digest }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '10.0.x' }
+      - run: dotnet restore --locked-mode
+      - run: dotnet build --no-restore -c ${{ inputs.configuration }}
+      - id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/${{ inputs.project }}:${{ github.sha }}

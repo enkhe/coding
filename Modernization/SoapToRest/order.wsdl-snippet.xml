@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Trimmed WSDL — illustrative only. -->
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:tns="http://contoso.com/orders"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  targetNamespace="http://contoso.com/orders">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://contoso.com/orders">
+      <xsd:element name="PlaceOrder">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="UserId" type="xsd:string" />
+            <xsd:element name="Amount" type="xsd:decimal" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="PlaceOrderResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="OrderId" type="xsd:string" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:portType name="OrdersPort">
+    <wsdl:operation name="PlaceOrder">
+      <wsdl:input message="tns:PlaceOrderInput" />
+      <wsdl:output message="tns:PlaceOrderOutput" />
+    </wsdl:operation>
+  </wsdl:portType>
+</wsdl:definitions>
