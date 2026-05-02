@@ -1,0 +1,68 @@
+openapi: 3.1.0
+info:
+  title: Orders API
+  version: 2026-01
+servers:
+  - url: https://api.contoso.com
+paths:
+  /api/orders:
+    post:
+      summary: Place an order
+      operationId: placeOrder
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlaceOrderRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400':
+          description: Validation problem
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+  /api/orders/{id}:
+    get:
+      summary: Get an order by id
+      operationId: getOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404': { description: Not found }
+components:
+  schemas:
+    PlaceOrderRequest:
+      type: object
+      required: [userId, amount]
+      properties:
+        userId: { type: string, format: uuid }
+        amount: { type: number, minimum: 0.01 }
+    Order:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        amount: { type: number }
+    ProblemDetails:
+      type: object
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }

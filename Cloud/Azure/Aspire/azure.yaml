@@ -1,0 +1,13 @@
+name: orders
+metadata:
+  template: aspire-template@1.0.0
+services:
+  app:
+    project: ./src/Orders.AppHost/Orders.AppHost.csproj
+    language: dotnet
+    host: containerapp
+hooks:
+  preprovision:
+    shell: pwsh
+    interactive: false
+    run: ./scripts/check-prerequisites.ps1

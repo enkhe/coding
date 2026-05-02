@@ -1,0 +1,5 @@
+name: orders-infra
+runtime: dotnet
+description: Pulumi stack for the orders service infrastructure.
+config:
+  azure-native:location: eastus

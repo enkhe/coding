@@ -1,0 +1,29 @@
+// KQL queries for Log Analytics + Cost Management exports.
+// Replace the table name with your export's table.
+
+// 1) Top 50 spenders in last 30 days
+Usage
+| where TimeGenerated > ago(30d)
+| summarize cost = sum(PreTaxCost) by ResourceId, ResourceType
+| top 50 by cost desc
+
+// 2) Spend by cost-center tag, month over month
+Usage
+| where TimeGenerated > ago(60d)
+| extend costCenter = tostring(Tags["cost-center"])
+| summarize cost = sum(PreTaxCost) by costCenter, bin(TimeGenerated, 30d)
+| evaluate pivot(TimeGenerated, sum(cost))
+
+// 3) Untagged resource groups (compliance gap)
+arg("").resourcecontainers
+| where type == "microsoft.resources/subscriptions/resourcegroups"
+| where isempty(tags["cost-center"]) or isempty(tags["app"]) or isempty(tags["env"])
+| project subscriptionId, name, location, tags
+
+// 4) Idle VMs in last 7 days (CPU < 5% avg)
+Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| where TimeGenerated > ago(7d)
+| summarize avgCpu = avg(CounterValue) by Computer
+| where avgCpu < 5
+| order by avgCpu asc

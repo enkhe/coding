@@ -1,0 +1,19 @@
+# Native AOT — sub-50MB images, sub-second cold starts.
+# Trade-offs: no reflection-heavy libraries, larger build time.
+# syntax=docker/dockerfile:1.7
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY . .
+RUN apt-get update && apt-get install -y clang zlib1g-dev && rm -rf /var/lib/apt/lists/*
+RUN dotnet publish src/Orders.Api/Orders.Api.csproj \
+    -c Release -o /app/publish \
+    -r linux-x64 --self-contained true \
+    /p:PublishAot=true /p:StripSymbols=true
+
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble-chiseled-extra
+WORKDIR /app
+COPY --from=build /app/publish/Orders.Api ./
+USER app
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENTRYPOINT ["./Orders.Api"]

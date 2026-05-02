@@ -1,11 +1,23 @@
-﻿# Components
+# Angular Components
 
-Code, examples, and notes related to Components.
+> Standalone components, signals-driven.
 
-## Layout
+```ts
+import { Component, computed, signal } from '@angular/core';
 
-> Add subprojects, demos, exercises, and notes here.
+@Component({
+  standalone: true,
+  selector: 'app-counter',
+  template: `
+    <p>Count: {{ count() }} (doubled: {{ doubled() }})</p>
+    <button (click)="increment()">+1</button>
+  `,
+})
+export class Counter {
+  readonly count = signal(0);
+  readonly doubled = computed(() => this.count() * 2);
+  increment() { this.count.update(n => n + 1); }
+}
+```
 
-## Status
-
-_Under construction._
+See [../README.md](../README.md) for the broader Angular cheatsheet.

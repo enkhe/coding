@@ -1,0 +1,59 @@
+trigger:
+  branches: { include: [main] }
+  paths: { include: [src/*, tests/*, '*.sln'] }
+
+pr:
+  branches: { include: ['*'] }
+
+variables:
+  - group: orders-shared
+  - name: buildConfiguration
+    value: Release
+  - name: dotnetVersion
+    value: '10.0.x'
+
+stages:
+  - stage: Build
+    jobs:
+      - template: templates/build-dotnet.yml
+        parameters:
+          version: $(dotnetVersion)
+          configuration: $(buildConfiguration)
+
+  - stage: DeployStaging
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: ToStaging
+        environment: staging
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                - task: AzureCLI@2
+                  inputs:
+                    azureSubscription: orders-staging
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      az containerapp update -n orders-api -g rg-orders-staging \
+                        --image $(containerImage):$(Build.SourceVersion)
+
+  - stage: DeployProd
+    dependsOn: DeployStaging
+    jobs:
+      - deployment: ToProd
+        environment: prod   # add approvers in DevOps portal
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureCLI@2
+                  inputs:
+                    azureSubscription: orders-prod
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      az containerapp update -n orders-api -g rg-orders-prod \
+                        --image $(containerImage):$(Build.SourceVersion)

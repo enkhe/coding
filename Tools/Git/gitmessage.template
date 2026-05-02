@@ -1,0 +1,14 @@
+# <type>(<scope>): <subject>
+# │ │ │
+# │ │ └─⫸ Imperative, present tense ("add" not "added")
+# │ └─⫸ Affected area (orders, payments, infra, etc.)
+# └─⫸ feat | fix | refactor | docs | test | perf | build | ci | chore
+#
+# Body (wrap at 72):
+# - Why: business / technical reason
+# - What: high-level changes
+# - Risk: anything reviewers should look at carefully
+#
+# Footer:
+# - Closes #123
+# - BREAKING CHANGE: <description>

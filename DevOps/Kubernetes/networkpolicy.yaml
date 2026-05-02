@@ -1,0 +1,40 @@
+# Default-deny + explicit allow. The hard part is enumerating "allow" — start strict.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: orders
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: orders-api-allow
+  namespace: orders
+spec:
+  podSelector: { matchLabels: { app: orders-api } }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: { matchLabels: { name: ingress-nginx } }
+      ports:
+        - { protocol: TCP, port: 8080 }
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector: { matchLabels: { name: kube-system } }
+          podSelector:       { matchLabels: { k8s-app: kube-dns } }
+      ports:
+        - { protocol: UDP, port: 53 }
+    # Postgres
+    - to:
+        - podSelector: { matchLabels: { app: postgres } }
+      ports:
+        - { protocol: TCP, port: 5432 }
+    # External payment provider via egress proxy.
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0, except: [10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12] }
+      ports:
+        - { protocol: TCP, port: 443 }
