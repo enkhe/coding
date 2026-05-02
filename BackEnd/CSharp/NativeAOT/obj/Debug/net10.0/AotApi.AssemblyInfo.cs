@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AotApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0788a3eba6c7dd2ede62769e903ddab86cfb1a8a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+58a1f29f8988db0938146310c5da8345e70d7df1")]
 [assembly: System.Reflection.AssemblyProductAttribute("AotApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AotApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
