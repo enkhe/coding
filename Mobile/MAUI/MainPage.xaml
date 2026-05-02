@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MyApp.ViewModels"
+             x:Class="MyApp.Views.MainPage"
+             x:DataType="vm:MainViewModel"
+             Title="Hello MAUI">
+
+    <ContentPage.BindingContext>
+        <vm:MainViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="24" VerticalOptions="Center">
+
+            <Label Text="{Binding Greeting}"
+                   FontSize="32"
+                   HorizontalOptions="Center" />
+
+            <Entry Placeholder="Your name"
+                   Text="{Binding Name, Mode=TwoWay}" />
+
+            <Button Text="Refresh"
+                    Command="{Binding RefreshCommand}"
+                    IsEnabled="{Binding IsNotBusy}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

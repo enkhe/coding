@@ -1,0 +1,37 @@
+version: prometheus/v1
+service: orders-api
+labels:
+  team: platform
+  tier: core
+slos:
+  - name: requests-availability
+    objective: 99.9
+    description: "99.9% of requests return non-5xx in 30 days."
+    sli:
+      events:
+        error_query: sum(rate(http_server_request_duration_seconds_count{job="orders-api",http_response_status_code=~"5.."}[{{.window}}]))
+        total_query: sum(rate(http_server_request_duration_seconds_count{job="orders-api"}[{{.window}}]))
+    alerting:
+      page_alert:
+        labels:
+          severity: page
+      ticket_alert:
+        labels:
+          severity: ticket
+
+  - name: requests-latency
+    objective: 99.0
+    description: "99% of requests finish under 300ms in 30 days."
+    sli:
+      events:
+        error_query: |
+          sum(rate(http_server_request_duration_seconds_bucket{job="orders-api",le="0.3"}[{{.window}}]))
+          - sum(rate(http_server_request_duration_seconds_count{job="orders-api"}[{{.window}}]))
+        total_query: sum(rate(http_server_request_duration_seconds_count{job="orders-api"}[{{.window}}]))
+    alerting:
+      page_alert:
+        labels:
+          severity: page
+      ticket_alert:
+        labels:
+          severity: ticket

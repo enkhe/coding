@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "pi761+3E9ZY=",
+  "success": true,
+  "projectFilePath": "/workspaces/coding/BackEnd/CSharp/NativeAOT/AotApi.csproj",
+  "expectedPackageFiles": [
+    "/home/codespace/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.4/microsoft.dotnet.ilcompiler.10.0.4.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.net.illink.tasks/10.0.4/microsoft.net.illink.tasks.10.0.4.nupkg.sha512",
+    "/home/codespace/.nuget/packages/runtime.linux-x64.microsoft.dotnet.ilcompiler/10.0.4/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.4.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.netcore.app.runtime.linux-x64/10.0.4/microsoft.netcore.app.runtime.linux-x64.10.0.4.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.aspnetcore.app.runtime.linux-x64/10.0.4/microsoft.aspnetcore.app.runtime.linux-x64.10.0.4.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.netcore.app.runtime.nativeaot.linux-x64/10.0.4/microsoft.netcore.app.runtime.nativeaot.linux-x64.10.0.4.nupkg.sha512",
+    "/home/codespace/.nuget/packages/runtime.linux-x64.microsoft.dotnet.ilcompiler/10.0.4/runtime.linux-x64.microsoft.dotnet.ilcompiler.10.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}
